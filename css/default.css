@@ -1,0 +1,32 @@
+body{
+    overflow: hidden;
+    background-color: #444444;
+    cursor: url("cursor.png"), grab;
+}
+
+body:active{
+    cursor: url("cursorActive.png"), grabbing;
+}
+
+#canvas{
+    background-color: #ffffff;
+    width: 100%;
+    height: 100%;
+    
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    transform: scale(1, 1);
+}
+
+/*
+#canvas:active{
+    cursor: grab;
+    cursor: grabbing;
+}
+*/
+#resources{
+    /*height: 0%;*/
+    overflow: hidden;
+}
