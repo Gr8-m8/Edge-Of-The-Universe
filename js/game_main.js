@@ -1,6 +1,7 @@
 const Keys = [];
 
 const CM = CanvasManager();
+const MM = MusicManager();
 
 var InGame = false;
 
@@ -9,8 +10,10 @@ const Player = NewPlayer();
 
 //#region InGame
 function Load(){
-    CM.Q();
     
+    CM.Q();
+    MM.Q();
+
     InGame = false;
 
     LoadLobby();
@@ -81,6 +84,8 @@ function DrawLobby(){
 function LoadGame(){
     CM.Elem.style.backgroundColor = "#000000";
     //CM.Elem.style.cursor = "none";
+
+    //MM.Play(0);
 
     GOM.Q();
     GOM.GameObjetsAdd(Player);

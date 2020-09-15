@@ -27,6 +27,29 @@ function CanvasManager(){
     return newCanvasManager;
 }
 
+function MusicManager(){
+    let newMusicManager = {};
+    newMusicManager.Music = [];
+    newMusicManager.Current = undefined;
+    newMusicManager.Volume = 0.1;
+
+    newMusicManager.Play = function(index){
+        if (this.Current != undefined){
+            this.Current.pause();
+        }
+        this.Current = this.Music[index];
+        this.Current.loop = true;
+        this.Current.volume = this.Volume;
+        this.Current.play();
+    };
+
+    newMusicManager.Q = function(){
+        this.Music.push(new Audio("audio/EdgeOfTheUniverse_v0-1.mp3"));
+    };
+
+    return newMusicManager;
+}
+
 function GameObjectManager(){
     let newGameObjectManager = {};
     newGameObjectManager.GameObjets = [];
@@ -46,19 +69,27 @@ function GameObjectManager(){
     }
 
     newGameObjectManager.SpawnPlanetCheck = function(){
+        let scale = 3;
         let spawnPosition = 
             [
-                Math.floor(Player.Position[0]/CM.Size()[0]), 
-                Math.floor(Player.Position[1]/CM.Size()[1])
+                Math.floor(Player.Position[0]/(CM.Size()[0] * scale)), 
+                Math.floor(Player.Position[1]/(CM.Size()[1] * scale))
             ];
+
+        //console.log(spawnPosition);
+        
+        if (spawnPosition[0] == 0 && spawnPosition[1] == 0){
+            scale = 0;
+        }
 
         if (!this.Planets.includes(spawnPosition.toString())){
             this.Planets.push(spawnPosition.toString());
-            this.GameObjetsAdd(NewPlanet([spawnPosition[0] + CM.Size()[0] * Math.random(), spawnPosition[1] + CM.Size()[1] * Math.random()]));
-        }
+            let newPlanet = NewPlanet([spawnPosition[0] * CM.Size()[0] * scale + CM.Size()[0] * scale * Math.random(), spawnPosition[1] * CM.Size()[1] * scale + CM.Size()[1] * scale * Math.random()]);
+            this.GameObjetsAdd(newPlanet);
 
-        console.log(spawnPosition);
-        console.log([spawnPosition[0] + CM.Size()[0] * Math.random(), spawnPosition[1] + CM.Size()[1] * Math.random()]);
+            console.log(spawnPosition[0] * CM.Size()[0] * scale, newPlanet.Position[0], spawnPosition[0] * CM.Size()[0] * scale + CM.Size()[0] * scale);
+            console.log(spawnPosition[1] * CM.Size()[1] * scale, newPlanet.Position[1], spawnPosition[1] * CM.Size()[1] * scale + CM.Size()[1] * scale);
+        }
     }
 
     newGameObjectManager.Update = function(){
@@ -94,6 +125,10 @@ function GameObjectManager(){
                     markedForUpdate[i].Collision(markedForUpdate[j]);
                 }
             }
+        }
+
+        if (InGame){
+            this.SpawnPlanetCheck();
         }
     };
 
