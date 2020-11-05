@@ -1,6 +1,6 @@
 function NewUIElem(setimgsrc = "img/Blank0.png", setPosition = [0, 0], setRotation = 0, setScale = [1, 1], setAlign = [50, 0]){
     let newUIElem = NewMesh(setimgsrc, setPosition, setRotation, setScale);
-    newUIElem.Type = "UI";
+    newUIElem.Type.push("UI");
     newUIElem.Align = [setAlign[0]/100, setAlign[1]/100];
 
     newUIElem.Draw = function(){
@@ -16,7 +16,7 @@ function NewUIElem(setimgsrc = "img/Blank0.png", setPosition = [0, 0], setRotati
 
 function NewUIText(setText = "TEXT", setPosition = [0, 0], setRotation = 0, setScale = [1, 1], setAlign = [50, 0], setimgsrc = "img/Blank0.png"){
     let newUIText = NewUIElem(setimgsrc, setPosition, setRotation, setScale, setAlign);
-    newUIText.Type = "UIText";
+    newUIText.Type.push("UIText");
 
     newUIText.Text = [];
     for (let i = 0; i < setText.length; i++){

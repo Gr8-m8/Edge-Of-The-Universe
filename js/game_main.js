@@ -1,12 +1,15 @@
 const Keys = [];
 
 const CM = CanvasManager();
+const BM = BackgroundManager();
 const MM = MusicManager();
-
-var InGame = false;
 
 const GOM = GameObjectManager();
 const Player = NewPlayer();
+
+const EM = EventManager();
+
+var InGame = false;
 
 //#region InGame
 function Load(){
@@ -22,12 +25,12 @@ function Load(){
 
 function Update(){
     if (Keys.includes("ESCAPE")){
-        console.log("Escape");
+        console.log("Update Stop");
         return 1;
     }
 
     if (Keys.includes("ENTER") && !InGame){
-        console.log("Enter");
+        console.log("Enter Game");
         InGame = true;
         LoadGame();
     }
@@ -41,6 +44,7 @@ function Update(){
     }
 
     Draw();
+
 }
 
 function Draw(){
@@ -90,7 +94,8 @@ function LoadGame(){
     GOM.Q();
     GOM.GameObjetsAdd(Player);
 
-    //GOM.GameObjetsAdd(NewPlanet([0, 0]));
+    BM.Q();
+    EM.Q();
 }
 
 function UpdateGame(){
@@ -110,11 +115,15 @@ function UpdateGame(){
         Player.Shoot();
     }
 
+    EM.Update();
     GOM.Update();
+    BM.Update();
 }
 
 function DrawGame(){
+    BM.Draw();
     GOM.Draw();
+    
 }
 
 //#endregion

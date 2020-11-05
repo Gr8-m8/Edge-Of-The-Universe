@@ -87,8 +87,8 @@ function GameObjectManager(){
             let newPlanet = NewPlanet([spawnPosition[0] * CM.Size()[0] * scale + CM.Size()[0] * scale * Math.random(), spawnPosition[1] * CM.Size()[1] * scale + CM.Size()[1] * scale * Math.random()]);
             this.GameObjetsAdd(newPlanet);
 
-            console.log(spawnPosition[0] * CM.Size()[0] * scale, newPlanet.Position[0], spawnPosition[0] * CM.Size()[0] * scale + CM.Size()[0] * scale);
-            console.log(spawnPosition[1] * CM.Size()[1] * scale, newPlanet.Position[1], spawnPosition[1] * CM.Size()[1] * scale + CM.Size()[1] * scale);
+            //console.log(spawnPosition[0] * CM.Size()[0] * scale, newPlanet.Position[0], spawnPosition[0] * CM.Size()[0] * scale + CM.Size()[0] * scale);
+            //console.log(spawnPosition[1] * CM.Size()[1] * scale, newPlanet.Position[1], spawnPosition[1] * CM.Size()[1] * scale + CM.Size()[1] * scale);
         }
     }
 
@@ -100,16 +100,10 @@ function GameObjectManager(){
             if (Math.abs(Player.Position[0] - this.GameObjets[i].Position[0]) < CM.Size()[0] && Math.abs(Player.Position[1] - this.GameObjets[i].Position[1]) < CM.Size()[1]){
                 markedForUpdate.push(this.GameObjets[i]);
             } else {
-                switch(this.GameObjets[i].Type){
-                    default:
-                        markedForDelete.push(this.GameObjets[i]);
-                        break;
-
-                        case "Planet":
-                            break;
-
-                        case "Item":
-                            break;
+                if (!this.GameObjets[i].Type.includes("Player") ||
+                    !this.GameObjets[i].Type.includes("Planet") ||
+                    !this.GameObjets[i].Type.includes("Item")){
+                    markedForDelete.push(this.GameObjets[i]);
                 }
             }
         }
@@ -120,11 +114,15 @@ function GameObjectManager(){
 
         for (let i = 0; i < markedForUpdate.length; i++){
             markedForUpdate[i].Update();
-            for (let j = markedForUpdate.length-1; j > 0; j--){
+            for (let j = 0; j < markedForUpdate.length; j++){
                 if (i != j){
                     markedForUpdate[i].Collision(markedForUpdate[j]);
                 }
             }
+        }
+
+        if(Keys.includes("H")){
+            console.log(markedForUpdate);
         }
 
         if (InGame){
@@ -137,28 +135,24 @@ function GameObjectManager(){
 
         for (let k = 0; k < this.GameObjets.length; k++){
             if (Math.abs(Player.Position[0] - this.GameObjets[k].Position[0]) < CM.Size()[0] && Math.abs(Player.Position[1] - this.GameObjets[k].Position[1]) < CM.Size()[1]){
-                switch(this.GameObjets[k].Type){
-                    default:
-                        layers[3].push(this.GameObjets[k])
-                        break;
+                if (this.GameObjets[k].Type.includes("UI")){
+                    layers[0].push(this.GameObjets[k]);
+                } else
 
-                        case "UI":
-                        case "UIText":
-                            layers[0].push(this.GameObjets[k]);
-                            break;
+                if (this.GameObjets[k].Type.includes("Player")){
+                    layers[1].push(this.GameObjets[k]);
+                } else
 
-                        case "Player":
-                            layers[1].push(this.GameObjets[k]);
-                            break;
+                if (this.GameObjets[k].Type.includes("Item")){
+                    layers[2].push(this.GameObjets[k]);
+                } else 
 
-                        case "Item":
-                            layers[2].push(this.GameObjets[k]);
-                            break;
-
-                        case "Planet":
-                            layers[4].push(this.GameObjets[k]);
-                            break;
-
+                if (this.GameObjets[k].Type.includes("Planet")){
+                    layers[4].push(this.GameObjets[k]);
+                } 
+                
+                else {
+                    layers[3].push(this.GameObjets[k])
                 }
             }
         }
@@ -175,4 +169,109 @@ function GameObjectManager(){
     }
 
     return newGameObjectManager;
+}
+
+function BackgroundManager(){
+    let newBackgroundManager = {};
+
+    newBackgroundManager.Objects = [];
+
+    
+
+    newBackgroundManager.Update = function(){
+        for (let i = 0; i < this.Objects.length; i++){
+
+            if (this.Objects[i].Position[0] - Player.Position[0] * (1/3) < (-CM.Size()[0])){
+                this.Objects[i].Position[0] += CM.Size()[0] * 2;
+            }
+
+            if (this.Objects[i].Position[0] - Player.Position[0] * (1/3) > (CM.Size()[0])){
+                this.Objects[i].Position[0] -= CM.Size()[0] * 2;
+            }
+
+            if (this.Objects[i].Position[1] - Player.Position[1] * (1/3) < (-CM.Size()[1])){
+                this.Objects[i].Position[1] += CM.Size()[1] * 2;
+            }
+
+            if (this.Objects[i].Position[1] - Player.Position[1] * (1/3) > (CM.Size()[1])){
+                this.Objects[i].Position[1] -= CM.Size()[1] * 2;
+            }
+        }
+    }
+
+    newBackgroundManager.Draw = function(){
+        for (let i = 0; i < this.Objects.length; i++){
+            this.Objects[i].Draw((1/3));
+        }
+    }
+
+    newBackgroundManager.Q = function(){
+        for(let i = 0; i < 64; i++){
+            let position = [Math.random() * CM.Size()[0] * 2 - CM.Size()[0], Math.random() * CM.Size()[1] * 2 - CM.Size()[1]];
+            let rotation = Math.random() * 90 * 180/Math.PI;//180;
+            let scale = 1;
+            newBackgroundManager.Objects.push(NewMesh("img/Blank1.png", position, rotation, scale));
+            //console.log(position);
+        }
+    }
+
+    return newBackgroundManager;
+}
+
+function EventManager(){
+    let newEventManager = {};
+
+    newEventManager.triggerTimer;
+    newEventManager.triggerTimerReset = function(){
+        this.triggerTimer = 64 + Math.floor(Math.random() * 64);
+    }
+
+    newEventManager.Events = [[],[],[],[],[]];
+
+    newEventManager.EventTriggerCheck = function(){
+        this.triggerTimer--;
+        if (this.triggerTimer <= 0){
+            this.triggerTimerReset();
+
+            let eventSector = 0;
+
+            /*
+            if (Math.random() * 100 > 25){
+                if (Player.Position[0] < 0){
+                    if (Player.Position[1] < 0){
+                        eventSector = 1;
+                    } else {
+                        eventSector = 4;
+                    }
+                } else {
+                    if (Player.Position[1] < 0){
+                        eventSector = 2;
+                    } else {
+                        eventSector = 3;
+                    }
+                }
+            }
+            //*/
+
+            //this.Events[eventSector][Math.floor(Math.random() * this.Events[eventSector].length)]();
+        }
+    }
+
+    newEventManager.EventSpawnComet = function(){
+        GOM.GameObjetsAdd(NewComet());
+        
+        //console.log("Event:Spawn_Comet"); // [" + spawnpos + "; " + rotation + "; "+ force + "]");
+    }
+
+    newEventManager.Update = function(){
+        this.EventTriggerCheck();
+    }
+
+    newEventManager.Q = function(){
+        this.triggerTimerReset();
+
+        this.Events[0].push(this.EventSpawnComet);
+    }
+
+    return newEventManager;
 }

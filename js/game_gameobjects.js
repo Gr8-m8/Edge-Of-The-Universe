@@ -1,32 +1,46 @@
-function NewProjectile(setimgsrc = "img/Blank1.png", setPosition = [0, 0], setRotation = 0, setScale = [1, 1], setForceP = [0, 0], setForceR = 0){
-    let newProjectile = NewProp("img/PlanetShade1.png", setPosition, setRotation, setScale, setForceP, setForceR);
-    newProjectile.Type = "Projectile";
+function NewComet(){
+    let spawnpos = [Player.Position[0] - (CM.Size()[0]/2), Player.Position[1] - (CM.Size()[1]/2)];
+        if(Math.random() * 100 > 50){
+            if(Math.random() * 100 > 50){
+                spawnpos[0] += (CM.Size()[0]);
+            }
 
-    newProjectile.FrameDisable = 3;
+            spawnpos[1] += Math.random() * (CM.Size()[1]);
+        } else
+        {
+            if(Math.random() * 100 > 50){
+                spawnpos[1] += (CM.Size()[1]);
+            }
 
-    newProjectile.Update = function(){
-        this.FrameDisable = Math.max(0, this.FrameDisable -= 1);
-        this.Rotation = this.Rotation + this.ForceR;
-        this.Position = [this.Position[0] + this.ForceP[0], this.Position[1] + this.ForceP[1]];
-    };
+            spawnpos[0] += Math.random() * (CM.Size()[0]);
+        }
 
-    return newProjectile;
+    let rotation = (Math.atan2(Player.Position[1] - spawnpos[1], Player.Position[0] - spawnpos[0]) * (180/Math.PI) - 90 + (-10 + Math.random()*10));
+    let force = [Math.sin(-rotation * Math.PI/180) * 3, Math.cos(-rotation * Math.PI/180) * 3];
+    let scale = 3 + Math.random() * 10;
+
+    let newComet = NewProjectile("img/PlanetShade1.png", spawnpos, 0, [scale, scale], force, 1 + Math.random() * 4);
+    newComet.Type.push("Comet");
+
+    newComet.FrameDisable = 0;
+
+    return newComet;
 }
 
 function NewPlanet(setPosition){
-    let ps = 50 + Math.random() * 10;
+    let pscale = 40 + Math.random() * 40;
     let lp = [CM.Size()[0]/2, CM.Size()[1]/2];
-    let cl = [];
+    let clr = [];
     for (let i = 0; i < 1 + Math.floor(Math.random() * 5); i++){
-        cl.push(new Image());
-        cl[i].src = "img/Overlay" + (1 + Math.floor(Math.random() * 4)) + ".png";
+        clr.push(new Image());
+        clr[i].src = "img/Overlay" + (1 + Math.floor(Math.random() * 4)) + ".png";
     }
 
     let newPlanet = NewMesh("img/PlanetShade2.png", setPosition, Math.random() * 90, [1, 1]);
-    newPlanet.Type = "Planet";
+    newPlanet.Type.push("Planet");
     //newPlanet.Rotation = 45 + (Math.atan2(lp[1] - (newPlanet.Position[1]), lp[0] - (newPlanet.Position[0])) * (180/Math.PI));
-    newPlanet.Scale = [ps, ps];
-    newPlanet.Colors = cl;
+    newPlanet.Scale = [pscale, pscale];
+    newPlanet.Colors = clr;
 
     newPlanet.Update = function(){
         
@@ -45,7 +59,7 @@ function NewPlanet(setPosition){
         }
         */
 
-        newPlanet.Rotation += 1/32;
+        this.Rotation += 1/(newPlanet.Scale[0] * 32/40);
     };
 
     newPlanet.Draw = function(){
@@ -67,20 +81,27 @@ function NewPlanet(setPosition){
                 (this.Position[1] - this.Size()[1]/4 + Math.random() * this.Size()[1]/2)
             ];
 
-            let materials = ["AL", "FE", "AU", "AG"];
-
-            GOM.GameObjetsAdd(NewItem(pp, materials[Math.floor(Math.random() * materials.length)]));
+            GOM.GameObjetsAdd(NewMineral(pp));
         }
     }
 
     return newPlanet;
 }
 
+function NewMineral(setPosition){
+    let materials = ["AL", "FE", "AU", "AG"];
+    let newMineral = NewItem(setPosition, materials[Math.floor(Math.random() * materials.length)]);
+
+    newMineral.Type.push("Mineral");
+
+    return newMineral;
+}
+
 function NewPlayer(){
     let newPlayer = NewActor("img/Ship0.png", [0, 0], 180, [2, 2], [0, 0], 0, 100, []);
-    newPlayer.Type = "Player";
+    newPlayer.Type.push("Player");
 
-    newPlayer.CoolDown = 16;
+    newPlayer.CoolDown = 0;
     
     newPlayer.UIPosition = NewUIText("0_0", [8, 8], 0, [1, 1], [0, 0], "img/Blank1.png");
     newPlayer.UIInventory = [];
@@ -89,33 +110,6 @@ function NewPlayer(){
         NewUIElem("img/Blank2.png", [8, CM.Size()[1] - 16 - 8], 0, [100 * 2/16, 1], [0, 0]),
         NewUIText("100", [8 + (100 * 2)/2, CM.Size()[1] - 16 - 8], 0, [1, 1], [50, 0], "img/Blank0.png")
     ];
-
-    newPlayer.CollisionEXE = function(other){
-        switch (other.Type){
-            default:
-                return 0;
-                break;
-
-            case "Item":
-                let itemID = other.ItemID;
-                this.InventoryAdd(itemID);
-                GOM.GameObjetsRemove(other);
-                break;
-
-            case "Planet":
-                
-                break;
-
-            case "Projectile":
-                if(other.FrameDisable <= 0){
-                    this.Health -=10;
-                    this.ForceP = [this.ForceP[0] * 0.5, this.ForceP[1] * 0.5];
-                    GOM.GameObjetsRemove(other);
-                }
-                break;
-
-        }
-    }
 
     newPlayer.Move = function(){
         let max = 50;
@@ -166,9 +160,6 @@ function NewPlayer(){
             this.UIInventory.push(NewUIText(this.Inventory[i][0] + "_" + this.Inventory[i][1], [8, 16*3 + 16*i], 0, [1, 1], [0, 0], "img/Blank1.png"));
         }
 
-        if (Keys.includes("P")){
-            console.log(this.UIHealth[2]);
-        }
         this.UIHealth[2].TextSet(this.Health.toString());
         this.UIHealth[1].Scale[0] = Math.min(100 * 2/16, this.Health * 2/16);
     };
@@ -188,8 +179,6 @@ function NewPlayer(){
         for(let i = 0; i < this.UIHealth.length; i++){
             this.UIHealth[i].Draw();
         }
-
-        
     };
 
     return newPlayer;

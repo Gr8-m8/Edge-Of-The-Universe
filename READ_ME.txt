@@ -1,6 +1,9 @@
 TO PLAY THE GAME
 //===//===//===//
-Open "index.html" in a browser of your choosing
+Open "index.html" in a browser.
+
+The browser must support the "<canvas>" html element.
+The browser must support scripts and have them enabled.
 
 CONTROLS
 //===//===//===//
@@ -25,7 +28,7 @@ These factions and bosses are:
 
 NOTES
 //===//===//===//
-1. I know there is no friction nor edge in space
+1. I know there is no friction nor an edge in space
 2. If you have preformance issues, try downscaling the game window size, only objects within the screenbounds are Updated
 3.
 4.

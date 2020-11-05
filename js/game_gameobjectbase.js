@@ -3,7 +3,7 @@ function NewMesh(setimgsrc = "img/Blank1.png", setPosition = [0, 0], setRotation
     img.src = setimgsrc;
     
     let newMesh = {};
-    newMesh.Type = "Mesh";
+    newMesh.Type = ["Mesh"];
     newMesh.Img = img; 
     newMesh.Position = setPosition;
     newMesh.Rotation = setRotation;
@@ -41,16 +41,20 @@ function NewMesh(setimgsrc = "img/Blank1.png", setPosition = [0, 0], setRotation
         return false;
     };
 
+    newMesh.CollisionEXE = function(other){};
+
     newMesh.Forward = function(){
         return [Math.sin(-this.Rotation * Math.PI/180), Math.cos(-this.Rotation * Math.PI/180)];
     }
 
-    newMesh.CollisionEXE = function(other){};
+    newMesh.LookAt = function(position, compensation){
+        this.Rotation = (Math.atan2(position[1] - this.Position[1], position[0] - this.Position[0]) * (180/Math.PI)+ compensation);
+    }
 
     newMesh.Update = function(){};
 
-    newMesh.Draw = function(){
-        CM.Pen.translate(this.Position[0] - (Player.Position[0] - CM.Size()[0]/2), this.Position[1] - (Player.Position[1] - CM.Size()[1]/2));
+    newMesh.Draw = function(ppp = 1){
+        CM.Pen.translate(this.Position[0] - (Player.Position[0] * ppp - CM.Size()[0]/2), this.Position[1] - (Player.Position[1] * ppp - CM.Size()[1]/2));
         CM.Pen.rotate(Math.PI/180 * this.Rotation);
         CM.Pen.scale(this.Scale[0], this.Scale[1]);
         CM.Pen.drawImage(this.Img, - this.Img.width/2, - this.Img.height/2);
@@ -58,13 +62,13 @@ function NewMesh(setimgsrc = "img/Blank1.png", setPosition = [0, 0], setRotation
     };
 
     newMesh.Q = function(){};
-    
+
     return newMesh;
 }
 
 function NewProp(setimgsrc = "img/Blank1.png", setPosition = [0, 0], setRotation = 0, setScale = [1, 1], setForceP = [0, 0], setForceR = 0){
     let newProp = NewMesh(setimgsrc, setPosition, setRotation, setScale);
-    newProp.Type = "Prop";
+    newProp.Type.push("Prop");
     newProp.ForceP = setForceP;
     newProp.ForceR = setForceR;
     newProp.FrictionP = 0.97;
@@ -83,7 +87,7 @@ function NewProp(setimgsrc = "img/Blank1.png", setPosition = [0, 0], setRotation
 
 function NewActor(setimgsrc = "img/Blank1.png", setPosition = [0, 0], setRotation = 0, setScale = [1, 1], setForceP = [0, 0], setForceR = 0, setHealth = 100, setInventory = []){
     let newActor = NewProp(setimgsrc, setPosition, setRotation, setScale, setForceP, setForceR);
-    newActor.Type = "Actor";
+    newActor.Type.push("Actor");
     newActor.Health = setHealth;
     newActor.Inventory = setInventory;
     
@@ -117,22 +121,60 @@ function NewActor(setimgsrc = "img/Blank1.png", setPosition = [0, 0], setRotatio
 }
 
 function NewItem(setPosition, setItemID){
-    let newItem = NewProp("img/PlanetShade0.png", setPosition, 0, [2, 2], [0, 0], [0, 0]);
-    newItem.Type = "Item";
+    let newItem = NewProp("img/PlanetShade0.png", setPosition, 0, [2, 2], [0, 0], 0);
+    newItem.Type.push("Item");
     newItem.ItemID = setItemID;
 
     newItem.CollisionEXE = function(other){
-        switch (other.Type){
-            default:
-                return 0;
-                break;
+        
+        if (other.Type.includes("Actor")){
+            other.InventoryAdd(this.ItemID);
+            GOM.GameObjetsRemove(this);
 
-            case "Player":
-                //other.InventoryAdd(this.ItemID);
-                //GOM.GameObjetsRemove(this);
-                break;
+        }
+    }
+
+    return newItem;
+}
+
+function NewProjectile(setimgsrc = "img/PlanetShade1.png", setPosition = [0, 0], setRotation = 0, setScale = [1, 1], setForceP = [0, 0], setForceR = 0){
+    let newProjectile = NewProp(setimgsrc, setPosition, setRotation, setScale, setForceP, setForceR);
+    newProjectile.Type.push("Projectile");
+
+    newProjectile.FrameDisable = 3;
+
+    newProjectile.CollisionEXE = function(other){
+        if(other.FrameDisable <= 0){
+            if (other.Type.includes("Comet")){
+                GOM.GameObjetsAdd(NewMineral(this.Position));
+                GOM.GameObjetsRemove(other);
+                GOM.GameObjetsRemove(this);
+            }
+
+            if (other.Type.includes("Projectile")){
+                GOM.GameObjetsRemove(other);
+                GOM.GameObjetsRemove(this);
+            }
+
+            if (other.Type.includes("Actor")){
+                //other.Health -= 10;
+                //other.ForceP = [other.ForceP[0] * 1/2, other.ForceP[1] * 1/2];
+                GOM.GameObjetsRemove(this);
+            }
+
+            if(Keys.includes("K")){
+                console.log(other);
+            }
         }
     };
 
-    return newItem;
+    newProjectile.Update = function(){
+        if (this.FrameDisable > 0){
+            this.FrameDisable = Math.max(0, this.FrameDisable -= 1);
+        }
+        this.Rotation = this.Rotation + this.ForceR;
+        this.Position = [this.Position[0] + this.ForceP[0], this.Position[1] + this.ForceP[1]];
+    };
+
+    return newProjectile;
 }
