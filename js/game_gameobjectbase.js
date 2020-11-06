@@ -166,10 +166,8 @@ function NewProjectile(setimgsrc = "img/PlanetShade1.png", setPosition = [0, 0],
 
     newProjectile.Update = function(){
         if (this.FrameDisable > 0){
-            this.FrameDisable--; //= Math.max(0, this.FrameDisable -= 1);
+            this.FrameDisable--;
         }
-        this.Rotation = this.Rotation + this.ForceR;
-        this.Position = [this.Position[0] + this.ForceP[0], this.Position[1] + this.ForceP[1]];
     };
 
     return newProjectile;
