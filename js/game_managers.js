@@ -95,35 +95,31 @@ function GameObjectManager(){
     newGameObjectManager.Update = function(){
         let markedForUpdate = [];
         let markedForDelete = [];
+        let markedForStatis = [];
 
         for (let i = 0; i < this.GameObjets.length; i++){
             if (Math.abs(Player.Position[0] - this.GameObjets[i].Position[0]) < CM.Size()[0] && Math.abs(Player.Position[1] - this.GameObjets[i].Position[1]) < CM.Size()[1]){
                 markedForUpdate.push(this.GameObjets[i]);
             } else {
-                if (!this.GameObjets[i].Type.includes("Player") ||
-                    !this.GameObjets[i].Type.includes("Planet") ||
-                    !this.GameObjets[i].Type.includes("Item")){
+                if (this.GameObjets[i].Type.includes("Player") ||
+                    this.GameObjets[i].Type.includes("Planet") ||
+                    this.GameObjets[i].Type.includes("Item")){
+                    markedForStatis.push(this.GameObjets[i]);
+                } else {
                     markedForDelete.push(this.GameObjets[i]);
                 }
             }
-        }
-
-        for (let i = 0; i < markedForDelete.length; i++){
-            this.GameObjetsRemove(markedForDelete[i]);
         }
 
         for (let i = 0; i < markedForUpdate.length; i++){
             markedForUpdate[i].Update();
             for (let j = 0; j < markedForUpdate.length; j++){
                 if (i != j){
-                    markedForUpdate[i].Collision(markedForUpdate[j]);
+                    markedForUpdate[j].Collision(markedForUpdate[i]);
                 }
             }
         }
 
-        if(Keys.includes("H")){
-            console.log(markedForUpdate);
-        }
 
         if (InGame){
             this.SpawnPlanetCheck();
@@ -175,8 +171,6 @@ function BackgroundManager(){
     let newBackgroundManager = {};
 
     newBackgroundManager.Objects = [];
-
-    
 
     newBackgroundManager.Update = function(){
         for (let i = 0; i < this.Objects.length; i++){

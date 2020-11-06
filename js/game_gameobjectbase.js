@@ -144,7 +144,13 @@ function NewProjectile(setimgsrc = "img/PlanetShade1.png", setPosition = [0, 0],
     newProjectile.FrameDisable = 3;
 
     newProjectile.CollisionEXE = function(other){
-        if(other.FrameDisable <= 0){
+        if(this.FrameDisable <= 0){
+            if (other.Type.includes("Actor")){
+                other.Health -= 10;
+                other.ForceP = [other.ForceP[0] * 1/2, other.ForceP[1] * 1/2];
+                GOM.GameObjetsRemove(this);
+            }
+
             if (other.Type.includes("Comet")){
                 GOM.GameObjetsAdd(NewMineral(this.Position));
                 GOM.GameObjetsRemove(other);
@@ -155,22 +161,12 @@ function NewProjectile(setimgsrc = "img/PlanetShade1.png", setPosition = [0, 0],
                 GOM.GameObjetsRemove(other);
                 GOM.GameObjetsRemove(this);
             }
-
-            if (other.Type.includes("Actor")){
-                //other.Health -= 10;
-                //other.ForceP = [other.ForceP[0] * 1/2, other.ForceP[1] * 1/2];
-                GOM.GameObjetsRemove(this);
-            }
-
-            if(Keys.includes("K")){
-                console.log(other);
-            }
         }
     };
 
     newProjectile.Update = function(){
         if (this.FrameDisable > 0){
-            this.FrameDisable = Math.max(0, this.FrameDisable -= 1);
+            this.FrameDisable--; //= Math.max(0, this.FrameDisable -= 1);
         }
         this.Rotation = this.Rotation + this.ForceR;
         this.Position = [this.Position[0] + this.ForceP[0], this.Position[1] + this.ForceP[1]];
