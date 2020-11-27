@@ -64,11 +64,11 @@ function LoadLobby(){
 
     let scale = 0;
     scale = 3;
-    GOM.GameObjetsAdd(NewUIText("THE_EDGE_OF_THE_UNIVERSE", [CM.Size()[0]/2, CM.Size()[1] * 1/5], 0, [scale, scale], [50, 0], "img/Blank1.png"));
+    GOM.GameObjetsAdd(NewText("THE_EDGE_OF_THE_UNIVERSE", [CM.Size()[0]/2, CM.Size()[1] * 1/5], 0, [scale, scale], [50, 0], "Blank1"));
     
     scale = 1;
-    GOM.GameObjetsAdd(NewUIElem("img/Ship0.png", [CM.Size()[0]/2, CM.Size()[1] * 2/3], 180, [32, 32], [50, 57.5]));
-    GOM.GameObjetsAdd(NewUIText("PRESS_ENTER_TO_START", [CM.Size()[0]/2, CM.Size()[1] * 2/3], 0, [scale, scale], [50, 0], "img/Blank1.png"));
+    GOM.GameObjetsAdd(NewImg("Ship0", [CM.Size()[0]/2, CM.Size()[1] * 2/3], 180, [32, 32], [50, 57.5]));
+    GOM.GameObjetsAdd(NewText("PRESS_ENTER_TO_START", [CM.Size()[0]/2, CM.Size()[1] * 2/3], 0, [scale, scale], [50, 0], "Blank1"));
     
 
     //GOM.GameObjetsAdd(NewUIText("1234567890_QWERTYUIOPASDFGHJKLZXCVBNM", [CM.Size()[0]/2, CM.Size()[1] - 32], 0, [scale, scale], [50, 0]));
